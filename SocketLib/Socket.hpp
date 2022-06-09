@@ -38,7 +38,7 @@ public:
     template<typename T>
     bool send(int sockfd, const T msg, int len, int flags);
     template<typename T>
-    bool recv(int sickfd, T buffer, int len, int flags);
+    bool recv(int sockfd, T buffer, int len, int flags);
 };
 
 class UDPSocket :public Socket{
