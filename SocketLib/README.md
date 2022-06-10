@@ -1,0 +1,1 @@
+SocketLib is a cross-platform lightweight C++ wrapper for networking

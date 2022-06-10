@@ -17,35 +17,42 @@
 
 class Socket {
 public:
-    int socket_file_descriptor;
+    Socket(std::string ip_addr, std::string port_no, int type, int domain, int protocol):ip_address(ip_addr),port_number(port_no){};
+    ~Socket();
     int error_code;
+    std::string ip_address;
+    bool getaddrinfo(const std::string node);
+    bool bind(const struct sockaddr *addr, socklen_t address_len); 
+    bool connect(const struct sockaddr *addr, socklen_t addres_len);
+    bool listen(int backlog);
+    bool accept(struct sockaddr *addr, socklen_t *addr_len); 
+    bool close();
+    bool shutdown(int how);
+private:
     struct addrinfo hints;
     struct addrinfo *servinfo;
     struct addrinfo *p;
-    bool getaddrinfo(const std::string node, const std::string service, const struct addrinfo *hints, const struct addrinfo **res);
-    bool bind(int sockfd, const struct sockaddr *addr, socklen_t address_len); 
-    bool connect(int sockfd, const struct sockaddr *addr, socklen_t addres_len);
-    bool listen(int sockfd, int backlog);
-    bool accept(int sockfd, struct sockaddr *addr, socklen_t *addr_len); 
-    bool close(int sockfd);
-    bool shutdown(int sockfd, int how);
+    int socket_;
+    std::string port_number;
+    int socket_file_descriptor;
+    int type_;
+    int domain_;
+    int protocol_;
 };
 
 class TCPSocket :public Socket{
 public:
-    TCPSocket();
+    TCPSocket(const std::string ip_addr, const std::string port_number);
     ~TCPSocket();
-    template<typename T>
-    bool send(int sockfd, const T msg, int len, int flags);
-    template<typename T>
-    bool recv(int sockfd, T buffer, int len, int flags);
+    bool send(int sockfd, void* msg, int len, int flags);
+    bool recv(int sockfd, void* buffer, int len, int flags);
 };
 
 class UDPSocket :public Socket{
+public:
     UDPSocket();
     ~UDPSocket();
+    bool sendto(int sockfd, void* msg, int len, int flags);
+    bool recvfrom(int sockfd, void* buffer, int len, int flags);
 };
-
-
-
 #endif /* Socket_h */
