@@ -17,36 +17,49 @@ class TCPClient{
 public:
     TCPClient(std::string ip_address, std::string port_number);
     ~TCPClient();
-    int ClientConnect();
+    int Connect();
+    int Receive();
+    int Send(std::string msg);
 private:
     std::string ip_address_;
     std::string port_number_;
+    std::string rx_message_;
     int socket_;
-    struct addrinfo hints;
-    struct addrinfo *servinfo;
-    struct addrinfo *p;
+    struct addrinfo hints_;
+    struct addrinfo *servinfo_;
+    struct addrinfo *p_;
 };
 
 TCPClient::TCPClient(std::string ip_address, std::string port_number):ip_address_(ip_address),port_number_(port_number){
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+    hints_.ai_family = AF_UNSPEC;
+    hints_.ai_socktype = SOCK_STREAM;
     
 } 
-int TCPClient::ClientConnect(){
-    if (getaddrinfo(ip_address_.c_str(), port_number_.c_str(), &hints, &servinfo)==-1){
-        //TODO: Error handling
-    }
-    for  (p = servinfo; p != NULL; p = p->ai_next){
-        socket_ = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (socket_!=-1){
-            return connect(socket_, p->ai_addr, p->ai_addrlen);
-        }
+int TCPClient::Connect(){
+    if (getaddrinfo(ip_address_.c_str(), port_number_.c_str(), &hints_, &servinfo_) == -1){
         return -1;
     }
-    
+    for  (p_ = servinfo_; p_ != NULL; p_ = p_->ai_next){
+        socket_ = socket(p_->ai_family, p_->ai_socktype, p_->ai_protocol);
+        if (socket_!=-1){
+            return connect(socket_, p_->ai_addr, p_->ai_addrlen);
+        }
+        if (p_ == NULL){
+            return -1;
+        }
+    }
+}
 
+int TCPClient::Receive(){
+    char buffer[1024] = {0};
+    rx_message_.clear();
+    int res = recv(socket_, buffer, sizeof(buffer), 0);
+    rx_message_ = std::string(buffer);
+    return res;
+}
 
-    //int res = connect(socket_, ip)
+int TCPClient::Send(std::string msg){
+   return send(socket_, msg.c_str(), msg.length(), 0);
 }
 
 class TCPServer{
